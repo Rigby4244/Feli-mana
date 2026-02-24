@@ -33,7 +33,6 @@ exports.requireRole = (...roles) => {
       return res.status(401).json({ message: "Not authorized" });
     }
 
-    // Debug info for role mismatch
     if (!roles.includes(req.user.role)) {
       console.warn(`Access denied. Required role(s): ${roles.join(",")}, user role: ${req.user.role}`);
       return res.status(403).json({ message: "Forbidden: insufficient role", required: roles, userRole: req.user.role });

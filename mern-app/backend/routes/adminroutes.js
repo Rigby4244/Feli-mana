@@ -77,7 +77,6 @@ router.post(
       await session.commitTransaction();
       session.endSession();
 
-      // Send password via email if mailer configured, otherwise return plaintext once
       if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
         try {
           await sendEmail({

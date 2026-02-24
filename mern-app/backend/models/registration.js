@@ -1,4 +1,3 @@
-// models/Registration.js
 const mongoose = require("mongoose");
 
 const registrationSchema = new mongoose.Schema(
@@ -34,7 +33,7 @@ const registrationSchema = new mongoose.Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["pending", "pending_review", "paid", "rejected"], // Updated enum
+      enum: ["pending", "pending_review", "paid", "rejected"], 
       default: "pending",
       index: true,
     },

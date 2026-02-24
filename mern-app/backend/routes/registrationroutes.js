@@ -83,13 +83,19 @@ router.post("/", protect, requireRole("participant"), async (req, res) => {
     });
 
     // Send email
-    await sendEmail({
-      from: process.env.EMAIL_USER,
-      to: req.user.email,
-      subject: "Event Registration Confirmed",
-      html: `<h3>Your Ticket ID: ${ticketId}</h3>
-             <img src="${qrCode}" />`,
-    });
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      try {
+        await sendEmail({
+          from: process.env.EMAIL_USER,
+          to: req.user.email,
+          subject: "Event Registration Confirmed",
+          html: `<h3>Your Ticket ID: ${ticketId}</h3>
+                 <img src="${qrCode}" />`,
+        });
+      } catch (mailErr) {
+        console.error("Email send failed:", mailErr);
+      }
+    }
 
     res.status(201).json(registration);
   } catch (err) {
@@ -160,14 +166,18 @@ router.patch(
         registration.qrCode = qrCode;
 
         const registrant = await User.findById(registration.userId);
-        if (registrant) {
-          await sendEmail({
-            from: process.env.EMAIL_USER,
-            to: registrant.email,
-            subject: "Payment Approved",
-            html: `<h3>Your registration is approved</h3>
-                   <img src="${qrCode}" />`,
-          });
+        if (registrant && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+          try {
+            await sendEmail({
+              from: process.env.EMAIL_USER,
+              to: registrant.email,
+              subject: "Payment Approved",
+              html: `<h3>Your registration is approved</h3>
+                     <img src="${qrCode}" />`,
+            });
+          } catch (mailErr) {
+            console.error("Email send failed:", mailErr);
+          }
         }
       }
 
@@ -175,13 +185,17 @@ router.patch(
         registration.paymentStatus = "rejected";
 
         const registrant = await User.findById(registration.userId);
-        if (registrant) {
-          await sendEmail({
-            from: process.env.EMAIL_USER,
-            to: registrant.email,
-            subject: "Payment Rejected",
-            html: `<h3>Your payment was rejected.</h3>`,
-          });
+        if (registrant && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+          try {
+            await sendEmail({
+              from: process.env.EMAIL_USER,
+              to: registrant.email,
+              subject: "Payment Rejected",
+              html: `<h3>Your payment was rejected.</h3>`,
+            });
+          } catch (mailErr) {
+            console.error("Email send failed:", mailErr);
+          }
         }
       }
 

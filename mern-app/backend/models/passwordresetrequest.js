@@ -1,4 +1,3 @@
-// models/PasswordResetRequest.js
 const mongoose = require("mongoose");
 
 const passwordResetRequestSchema = new mongoose.Schema(
