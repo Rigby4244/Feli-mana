@@ -1,0 +1,171 @@
+FELI-MANA MERN APP DEPLOYMENT GUIDE
+====================================
+
+PROJECT STRUCTURE
+-----------------
+mern-app/
+├── backend/               (Express.js server)
+│   ├── config/           (Database, email configuration)
+│   ├── models/           (MongoDB schemas)
+│   ├── routes/           (API endpoints)
+│   ├── middleware/       (Authentication, authorization)
+│   ├── .env              (Environment variables)
+│   ├── server.js         (Main server file)
+│   ├── seedadmin.js      (Admin seed script)
+│   └── package.json
+└── [frontend folder if exists]
+
+PREREQUISITES
+-------------
+- Node.js (v14 or higher)
+- npm (v6 or higher) or yarn
+- MongoDB Atlas account (or local MongoDB instance)
+- Gmail account with App Password (for email functionality)
+- Git (for version control)
+
+LOCAL SETUP
+-----------
+
+1. Install Dependencies:
+   cd backend
+   npm install
+
+2. Configure Environment Variables (.env):
+   Create/update backend/.env with:
+   
+   PORT=5001
+   MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/dbname?retryWrites=true&w=majority
+   JWT_SECRET=your_secure_random_string_here
+   ADMIN_EMAIL=admin@example.com
+   ADMIN_PASSWORD=secure_password
+   EMAIL_USER=your-gmail@gmail.com
+   EMAIL_PASS=your-16-char-app-password
+   FRONTEND_ORIGIN=http://localhost:3000
+   TRUST_PROXY=false
+   NODE_ENV=development
+
+3. Database Setup:
+   - Create a MongoDB Atlas cluster or use local MongoDB
+   - Update MONGO_URI in .env with your connection string
+   - Run seed admin script: node seedadmin.js
+
+4. Test Email Configuration:
+   - Generate Gmail App Password:
+     1. Go to https://myaccount.google.com/apppasswords
+     2. Select Mail and your device
+     3. Copy the 16-character password
+     4. Set EMAIL_PASS in .env
+   - Test email: node test-email.js
+
+5. Start Development Server:
+   npm run dev
+   (or: npm start)
+   
+   Server runs on http://localhost:5001
+
+API ENDPOINTS OVERVIEW
+---------------------
+Auth Routes (api/auth/):
+- POST /register           - Register new participant
+- POST /login              - Login (all roles)
+- POST /logout             - Logout
+
+Events (api/events/):
+- GET /                    - List all events
+- POST /                   - Create event (organizer only)
+- GET /:id                 - Get event details
+- PATCH /:id               - Update event
+- DELETE /:id              - Delete event
+
+Registration (api/registrations/):
+- POST /                   - Register for event
+- POST /:id/payment-proof  - Upload payment proof
+- PATCH /:id/payment-status - Approve/reject payment
+
+Admin (api/admin/):
+- POST /organizer          - Create organizer account
+- PATCH /password-reset    - Reset organizer password
+
+DEPLOYMENT TO RENDER
+---------------------
+
+1. Prepare for Deployment:
+   - Ensure .env variables are set in Render environment
+   - Update FRONTEND_ORIGIN in .env
+   - Set NODE_ENV=production
+   - Set TRUST_PROXY=true
+
+2. In Render Dashboard:
+   - Create New Service > Web Service
+   - Connect GitHub repository
+   - Build Command: npm install
+   - Start Command: npm start
+   - Add Environment Variables from .env
+
+3. Database Connection:
+   - Use MongoDB Atlas (cloud database recommended)
+   - Whitelist Render IP in MongoDB Atlas Network Access
+   - Set MONGO_URI in Render environment secrets
+
+4. Email Configuration:
+   - Set EMAIL_USER and EMAIL_PASS in Render environment
+   - Use Gmail App Password (not regular password)
+
+5. Deploy:
+   - Push code to GitHub
+   - Render auto-deploys on push
+   - Monitor logs in Render dashboard
+
+IMPORTANT NOTES
+---------------
+
+Email Functionality:
+- Gmail App Password required (not regular Gmail password)
+- Generate at: https://myaccount.google.com/apppasswords
+- Requires 2FA enabled on Gmail account
+- Emails sent for: registration, payments, password resets
+
+Authentication:
+- JWT tokens expire in 7 days
+- Protect routes with @protect and @requireRole middleware
+- Roles: "admin", "organizer", "participant"
+
+Database:
+- MongoDB Atlas schema auto-created from models
+- Indexes created on frequently queried fields
+- Transactions used for multi-step operations
+
+File Uploads:
+- Payment proof images stored as Base64 in MongoDB
+- Multer configured for image uploads
+- Max file size can be adjusted in routes
+
+Troubleshooting:
+- Check server logs: tail -f logs/server.log
+- Verify MongoDB connection: test in .env variables
+- Test email: node test-email.js
+- Clear node_modules and reinstall if dependency issues
+
+PRODUCTION CHECKLIST
+---------------------
+□ Update all .env variables for production
+□ Set NODE_ENV=production
+□ Enable HTTPS (Render provides free SSL)
+□ Set TRUST_PROXY=true
+□ Whitelist MongoDB IPs
+□ Set strong JWT_SECRET
+□ Configure CORS with specific FRONTEND_ORIGIN
+□ Enable email with valid credentials
+□ Set up error logging/monitoring
+□ Backup MongoDB regularly
+□ Monitor server performance
+
+USEFUL COMMANDS
+----------------
+npm start              - Start server
+npm run dev            - Start with nodemon (development)
+node seedadmin.js      - Seed admin account
+node test-email.js     - Test email configuration
+npm test               - Run tests (if configured)
+
+For questions or issues, check logs and ensure all .env variables are properly configured.

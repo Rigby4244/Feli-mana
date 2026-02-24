@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: feli-mana-backend
+    env: node
+    plan: free
+    region: oregon
+    branch: main
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: "5001"
+      - key: NODE_ENV
+        value: "production"
+      - key: TRUST_PROXY
+        value: "true"
